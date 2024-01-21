@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "socket": "nodemon src/controllers/socketioController.js"
+    "socket": "nodemon src/controllers/socketioController.js",
+    "ws": "nodemon src/controllers/webSocketController.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +17,12 @@
   "bugs": {
     "url": "https://github.com/ItsEugenio/BackProyectoPCSC1/issues"
   },
-  "homepage": "https://github.com/ItsEugenio/BackProyectoPCSC1#readme"
+  "homepage": "https://github.com/ItsEugenio/BackProyectoPCSC1#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.3",
+    "socket.io": "^4.7.4",
+    "ws": "^8.16.0"
+  }
 }
