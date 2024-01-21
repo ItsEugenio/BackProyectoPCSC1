@@ -153,5 +153,5 @@ wss.on('connection', (cliente) => {
 
 const PORT = 3000;
 server.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto ${PORT}`);
+  console.log(`Servidor esta escuchando en el puerto ${PORT}`);
 });
