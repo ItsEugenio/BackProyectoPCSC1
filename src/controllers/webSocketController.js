@@ -1,64 +1,56 @@
-const express = require('express');
-const http = require('http');
-const WebSocket = require('ws');
-const socketIO = require('socket.io');
+const express = require("express");
+const http = require("http");
+const WebSocket = require("ws");
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const serverIO = http.createServer();
-
-const io = require('socket.io')(serverIO, {
-    cors: { origin: '*' }
-});
-
-io.on('connection', (socket) => {
-    console.log('Se ha conectado un cliente');
-
-    socket.broadcast.emit('chat_message', {
-        usuario: 'INFO',
-        mensaje: 'Se ha conectado un nuevo usuario'
-    });
-
-    
-
-    socket.on('chat_message', (data) => {
-        io.emit('chat_message', data);
-    });
-});
-
-io.on('disconnet', (socket) => {
-  console.log('No conecto',socket);
-
-
-});
-
-
-
 const preguntas = [
   {
-    pregunta: '¿Cual es de estos paises tiene matricula amarrila?',
-    respuestas: ['Dinamarca ', 'Austria ', 'Hungria', 'Luxemburgo '],
-    respuestaCorrecta: 'Luxemburgo ',
+    pregunta: "¿Cual es de estos paises tiene azul en su bandera?",
+    respuestas: ["Madagascar", "Islas Bermudas", "Estonia", "Kirguistan"],
+    respuestaCorrecta: "Estonia",
   },
   {
-    pregunta: '¿Qué país del Medio Oriente es famoso por su histórica ciudad de Jerusalén y sus importantes lugares religiosos?',
-    respuestas: ['Israel', 'Irán ', 'Jordania', 'Libano'],
-    respuestaCorrecta: 'Israel',
+    pregunta: "¿Cual es de estos paises tiene matricula amarrila?",
+    respuestas: ["Dinamarca ", "Austria ", "Hungria", "Luxemburgo"],
+    respuestaCorrecta: "Luxemburgo",
   },
   {
-    pregunta: '¿Donde se ubica marina bay?',
-    respuestas: ['Singapur', 'Emiratos Arabes Unidos', 'Qatar', 'Malasia'],
-    respuestaCorrecta: 'Singapur', 
+    pregunta:
+      "¿Qué país del Medio Oriente es famoso por su histórica ciudad de Jerusalén y sus importantes lugares religiosos?",
+    respuestas: ["Israel", "Irán ", "Jordania", "Libano"],
+    respuestaCorrecta: "Israel",
   },
   {
-    pregunta: '¿Qué país europeo es conocido por su sector bancario?',
-    respuestas: ['Francia ', 'Alemania ', 'Suiza', 'Lituania'],
-    respuestaCorrecta: 'Suiza',
+    pregunta: "¿Donde se ubica marina bay?",
+    respuestas: ["Singapur", "Emiratos Arabes Unidos", "Qatar", "Malasia"],
+    respuestaCorrecta: "Singapur",
   },
-
+  {
+    pregunta: "¿Qué país europeo es conocido por su sector bancario?",
+    respuestas: ["Francia", "Alemania ", "Suiza", "Lituania"],
+    respuestaCorrecta: "Suiza",
+  },
+  {
+    pregunta: "¿Cual es de estos paises tiene matricula amarrila?",
+    respuestas: ["Colombia", "Mexico", "Guatemala", "Etiopia"],
+    respuestaCorrecta: "Colombia",
+  },
+  {
+    pregunta: "¿Cual es de estos paises habla ingles?",
+    respuestas: ["Canada", "Brasil", "Gales", "Estonia"],
+    respuestaCorrecta: "Canada",
+  },
+  {
+    pregunta: "¿En que continenete esta Gamboya?",
+    respuestas: ["Africa", "Norte America", "Europa", "Asia"],
+    respuestaCorrecta: "Asia",
+  },
 ];
+const messageBuffer = [];
+
 
 let preguntaActualIndex = 0;
 let puntos = {};
@@ -74,7 +66,7 @@ function enviarMensajeAUsuario(cliente, tipo, contenido) {
 function enviarPregunta() {
   const preguntaActual = preguntas[preguntaActualIndex];
   const mensaje = {
-    tipo: 'pregunta',
+    tipo: "pregunta",
     pregunta: preguntaActual.pregunta,
     respuestas: preguntaActual.respuestas,
   };
@@ -89,27 +81,35 @@ function broadcast(mensaje) {
 
 function pasarASiguientePregunta(respuestaUsuario, cliente) {
   const preguntaActual = preguntas[preguntaActualIndex];
-  const puntajeActual = puntos;
+ 
 
-  enviarMensajeAUsuario(cliente, 'mensaje', `Respuesta ${preguntaActual.respuestaCorrecta === respuestaUsuario ? 'correcta' : 'incorrecta'}`);
-  
-  enviarMensajeAUsuario(cliente, 'mensaje', `Puntos acumulados: esta en producción`);
+  enviarMensajeAUsuario(
+    cliente,
+    "mensaje",
+    `Respuestaaa ${
+      preguntaActual.respuestaCorrecta === respuestaUsuario
+        ? "correctaaa"
+        : "incorrectaaa"
+    }`
+  );
+
+
 
   if (preguntaActual.respuestaCorrecta === respuestaUsuario) {
     preguntaActualIndex += 1;
-    
+
     if (preguntaActualIndex < preguntas.length) {
       enviarPregunta();
     } else {
       const resultado = {
-        tipo: 'resultado',
+        tipo: "resultado",
         puntos: puntos,
       };
       broadcast(resultado);
 
       const gameOverMensaje = {
-        tipo: 'mensaje',
-        contenido: 'GAME OVER',
+        tipo: "mensaje",
+        contenido: "GAME OVER",
       };
       broadcast(gameOverMensaje);
 
@@ -123,30 +123,39 @@ function reiniciarJuego() {
   puntos = {};
 }
 
-wss.on('connection', (cliente) => {
-  console.log('Cliente conectado');
+wss.on("connection", (cliente) => {
+  console.log("Cliente conectado");
+  const logi = Object.keys(wss).length;
 
-  puntos[cliente] = 0;
+  console.log('segun conectados',logi)
+
+  
 
   enviarPregunta();
 
-  cliente.on('message', (mensaje) => {
+  cliente.on("message", (mensaje) => {
     const respuesta = JSON.parse(mensaje);
 
     const preguntaActual = preguntas[preguntaActualIndex];
-    if (respuesta && respuesta.tipo === 'respuesta') {
+    if (respuesta && respuesta.tipo === "respuesta") {
       if (respuesta.respuesta === preguntaActual.respuestaCorrecta) {
         puntos[cliente] += 1;
 
         pasarASiguientePregunta(respuesta.respuesta, cliente);
       } else {
-        enviarMensajeAUsuario(cliente, 'mensaje', `Respuesta incorrecta Vuelve a intentarlo.`);
+        enviarMensajeAUsuario(
+          cliente,
+          "mensaje",
+          `Respuesta incorrecta Vuelve a intentarlo`
+        );
       }
+      messageBuffer.push(mensaje);
+      console.log('Pregunta: ',preguntaActual.pregunta,' respuesta del cliente => ',respuesta.respuesta)
     }
   });
 
-  cliente.on('close', () => {
-    console.log('Cliente desconectado');
+  cliente.on("close", () => {
+    console.log("Cliente desconectado");
     delete puntos[cliente];
   });
 });
